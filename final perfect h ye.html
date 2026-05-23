@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday, Bharti!</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, #010105 0%, #030312 60%, #070919 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            transition: background 3.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body.light-theme {
+            background: linear-gradient(180deg, #ffb3c1 0%, #ffcbd5 50%, #fff5f7 100%); 
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* --- STAGE 1: ORBITAL CONSTELLATION --- */
+        #skyOverlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #010103;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1.2s ease, visibility 1.2s;
+        }
+
+        .sky-header {
+            text-align: center;
+            z-index: 10;
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+
+        .sky-title {
+            color: #fff;
+            font-size: 1.8rem;
+            text-shadow: 0 0 15px #00ffff, 0 0 30px rgba(0,255,255,0.3);
+            margin-bottom: 8px;
+        }
+
+        .sky-instructions {
+            color: #ff007f;
+            font-size: 0.95rem;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .orbit-universe {
+            position: relative;
+            width: 360px;
+            height: 360px;
+            border: 1px dashed rgba(0, 255, 255, 0.15);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .quantum-node {
+            position: absolute;
+            width: 42px;
+            height: 42px;
+            background: rgba(5, 15, 35, 0.85);
+            border: 2px solid #00ffff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: #00ffff;
+            cursor: pointer;
+            box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
+            transition: background 0.3s, border 0.3s, box-shadow 0.3s, transform 0.2s;
+            transform-origin: center;
+        }
+
+        .quantum-node:hover {
+            transform: scale(1.1);
+            background: #00ffff;
+            color: #010105;
+            box-shadow: 0 0 25px #00ffff;
+        }
+
+        .quantum-node.locked-in {
+            background: #ff007f !important;
+            border-color: #ffffff !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 30px #ff007f, 0 0 10px #ffffff !important;
+            pointer-events: none;
+            transform: scale(1.1);
+        }
+
+        /* --- INTERACTIVE CONTAINER CARDS --- */
+        .page {
+            display: none;
+            z-index: 3;
+            width: 92%;
+            max-width: 460px;
+            max-height: 85vh;
+            background: rgba(4, 4, 12, 0.85);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            padding: 30px 24px;
+            border-radius: 32px;
+            text-align: center;
+            border: 1px solid rgba(255, 0, 127, 0.3);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(255, 0, 127, 0.15);
+            animation: scaleUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transition: opacity 0.5s ease;
+        }
+
+        .page.active {
+            display: flex !important;
+            flex-direction: column;
+        }
+
+        body.light-theme .page {
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(255, 77, 166, 0.25);
+            box-shadow: 0 20px 50px rgba(230, 0, 92, 0.06);
+        }
+
+        @keyframes scaleUp {
+            from { opacity: 0; transform: scale(0.9) translateY(30px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 2rem;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px #ff007f, 0 0 20px rgba(255, 0, 127, 0.6), 0 0 30px rgba(0, 255, 255, 0.4);
+            flex-shrink: 0;
+        }
+        body.light-theme h1 { color: #b3003b; text-shadow: none; }
+
+        .date {
+            color: #ff007f;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            margin-bottom: 15px;
+            text-shadow: 0 0 8px rgba(255, 0, 127, 0.7);
+            flex-shrink: 0;
+        }
+        body.light-theme .date { color: #cc0052; text-shadow: none; }
+
+        .note {
+            color: #d8d8f5;
+            font-size: 0.98rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            text-align: justify;
+            text-justify: inter-word;
+            overflow-y: auto;
+            padding-right: 8px;
+            max-height: 40vh;
+            touch-action: pan-y;
+            -webkit-overflow-scrolling: touch;
+        }
+        body.light-theme .note { color: #4a0026; font-weight: 500; }
+
+        .note::-webkit-scrollbar {
+            width: 4px;
+        }
+        .note::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        body.light-theme .note::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.03);
+        }
+        .note::-webkit-scrollbar-thumb {
+            background: rgba(255, 0, 127, 0.4);
+            border-radius: 10px;
+        }
+        body.light-theme .note::-webkit-scrollbar-thumb {
+            background: rgba(179, 0, 59, 0.3);
+        }
+
+        .next-btn {
+            background: #ff007f;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: auto;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .next-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 20px rgba(255, 0, 127, 0.5);
+        }
+
+        .instruction-text {
+            color: #85e3ff;
+            font-size: 1.02rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+            background: rgba(0,0,0,0.4);
+            padding: 10px 14px;
+            border-radius: 14px;
+            line-height: 1.4;
+        }
+
+        /* --- BOTTLE ARENA CONTEXT --- */
+        .puzzle-viewport {
+            position: relative;
+            height: 340px;
+            margin: 15px auto;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .bottle-frame {
+            width: 95px;
+            height: 160px;
+            background: rgba(220, 245, 255, 0.12);
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            border-radius: 25px 25px 40px 40px;
+            position: relative;
+            box-shadow: inset 0 0 25px rgba(255,255,255,0.15), 0 15px 35px rgba(0,0,0,0.6);
+            animation: seaSway 4s ease-in-out infinite alternate;
+            transform-origin: center bottom;
+            z-index: 5;
+            transition: opacity 0.4s ease;
+        }
+
+        .bottle-frame::before {
+            content: '';
+            position: absolute;
+            top: -28px; left: 50%;
+            transform: translateX(-50%);
+            width: 32px; height: 30px;
+            background: rgba(220, 245, 255, 0.15);
+            border-left: 2px solid rgba(255, 255, 255, 0.35);
+            border-right: 2px solid rgba(255, 255, 255, 0.35);
+            border-top: 2px solid rgba(255, 255, 245, 0.4);
+        }
+
+        .cork-element {
+            position: absolute;
+            top: -42px; left: 50%;
+            transform: translateX(-50%) translateY(0px);
+            width: 26px; height: 26px;
+            background: #8b5a2b;
+            border-radius: 3px 3px 5px 5px;
+            z-index: 99;
+            cursor: grab;
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.4);
+            touch-action: none;
+        }
+        .cork-element:active { cursor: grabbing; }
+
+        .wax-seal {
+            position: absolute;
+            top: -46px; left: 50%;
+            transform: translateX(-50%);
+            width: 38px; height: 28px;
+            background: #d80032;
+            border-radius: 50%;
+            box-shadow: 0 0 12px #ff003c;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+            color: gold;
+            font-weight: bold;
+            pointer-events: none; 
+            transition: opacity 0.5s ease;
+        }
+
+        .mini-scroll-inside {
+            position: absolute;
+            top: 35px; left: 50%;
+            transform: translateX(-50%) rotate(-8deg);
+            width: 28px; height: 90px;
+            background: #f4ecd8;
+            border: 1px solid #c5b293;
+            border-radius: 3px;
+        }
+
+        .matchbox-element {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 70px;
+            height: 45px;
+            background: #cd7f32;
+            border: 2px solid #5c3a21;
+            border-radius: 5px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+            z-index: 40;
+        }
+        .matchbox-element::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 12px;
+            background: #4a2f1b;
+            border-radius: 0 0 3px 3px;
+        }
+        .matchbox-label {
+            font-size: 9px;
+            color: #fff;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .magic-match {
+            position: absolute;
+            bottom: 35px; right: 30px;
+            width: 65px; height: 8px;
+            background: #e6c280;
+            border-radius: 0 2px 2px 0;
+            cursor: grab;
+            touch-action: none;
+            z-index: 50;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            transform-origin: right center;
+        }
+        .magic-match::before {
+            content: '';
+            position: absolute;
+            left: -10px; top: -4px;
+            width: 11px; height: 16px;
+            background: #3a3a3a;
+            border-radius: 6px 3px 3px 6px;
+        }
+        .match-fire {
+            position: absolute;
+            left: -24px; top: -18px;
+            width: 16px; height: 26px;
+            background: radial-gradient(circle, #fff, #ffaa00, transparent);
+            border-radius: 50% 50% 35% 35%;
+            display: none;
+            animation: flameWiggle 0.1s infinite alternate;
+            box-shadow: 0 0 15px #ff5500;
+        }
+
+        .melt-progress-container {
+            position: absolute;
+            top: -75px; left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            background: rgba(0,0,0,0.5);
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            display: none;
+            z-index: 30;
+        }
+        .melt-progress-bar {
+            height: 100%; width: 0%;
+            background: #ff007f;
+            transition: width 0.1s linear;
+        }
+
+        /* --- GRAND PARCHMENT LETTER --- */
+        .unrolled-parchment {
+            display: none;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.3);
+            width: 92%;
+            max-width: 440px;
+            background: #fffef2;
+            border: 3px double #dfc1a5;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15), inset 0 0 30px rgba(215,190,160,0.4);
+            border-radius: 20px;
+            padding: 35px 25px;
+            z-index: 100;
+            opacity: 0;
+            transition: transform 1.5s cubic-bezier(0.19, 1, 0.22, 1), opacity 1.0s ease;
+        }
+        .unrolled-parchment.reveal-active {
+            display: block;
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        #suprise-msg {
+            color: #a30036;
+            font-size: 1.25rem;
+            font-weight: bold;
+            line-height: 1.6;
+            animation: simplePulse 1.5s infinite alternate;
+        }
+
+        @keyframes seaSway {
+            0% { transform: translateY(0) rotate(-3deg); }
+            100% { transform: translateY(-12px) rotate(3deg); }
+        }
+        @keyframes flameWiggle {
+            0% { transform: scaleX(0.9) rotate(-2deg); }
+            100% { transform: scaleX(1.1) rotate(2deg); }
+        }
+        @keyframes simplePulse {
+            0% { transform: scale(1); text-shadow: 0 0 3px #ffccd5; }
+            100% { transform: scale(1.02); text-shadow: 0 0 10px #ff66b3; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="fluidOceanCanvas"></canvas>
+
+    <!-- STAGE 1: ORBITAL MATRIX OVERLAY -->
+    <div id="skyOverlay">
+        <div class="sky-header">
+            <h2 class="sky-title">Quantum Cipher Matrix</h2>
+            <p class="sky-instructions" id="skyHelp">Trace the keyword in order: B → E → S → T → F → R → I → E → N → D</p>
+        </div>
+        
+        <div class="orbit-universe" id="universeCore">
+            <div class="quantum-node" id="node-B" onclick="verifyQuantumLink('B', 'node-B')">B</div>
+            <div class="quantum-node" id="node-E1" onclick="verifyQuantumLink('E', 'node-E1')">E</div>
+            <div class="quantum-node" id="node-S" onclick="verifyQuantumLink('S', 'node-S')">S</div>
+            <div class="quantum-node" id="node-T" onclick="verifyQuantumLink('T', 'node-T')">T</div>
+            <div class="quantum-node" id="node-F" onclick="verifyQuantumLink('F', 'node-F')">F</div>
+            <div class="quantum-node" id="node-R" onclick="verifyQuantumLink('R', 'node-R')">R</div>
+            <div class="quantum-node" id="node-I" onclick="verifyQuantumLink('I', 'node-I')">I</div>
+            <div class="quantum-node" id="node-E2" onclick="verifyQuantumLink('E', 'node-E2')">E</div>
+            <div class="quantum-node" id="node-N" onclick="verifyQuantumLink('N', 'node-N')">N</div>
+            <div class="quantum-node" id="node-D" onclick="verifyQuantumLink('D', 'node-D')">D</div>
+        </div>
+    </div>
+
+    <!-- GREETING PANEL CARD -->
+    <div class="page" id="page1">
+        <div style="font-size: 32px; margin-bottom: 5px; flex-shrink: 0;">❤️</div>
+        <h1>Happy Birthday, Bharti!</h1>
+        <div class="date">May 24th</div>
+        <p class="note">
+            You are truly one of the most special people in my life and honestly my only female friend who understands me so well. From the day we met in class 9, I never thought you would become such an important part of my life. I can literally talk to you endlessly and still never get bored. No matter how confused I am or what problems I face, you are always there to help me and support me like my personal guide and support system. And even though I tease you all the time by calling you “Monjulika,” you know it’s my favorite way of showing affection. Thank you for always being by my side, listening to me, and making life better just by being in it. Future doctor or not, you’ll always be my special person.
+        </p>
+        <button class="next-btn" onclick="loadBottlePuzzleRoom()">Unlock Secret Letter 🌊 →</button>
+    </div>
+
+    <!-- STAGE 2: BOTTLE POPPING ARENA -->
+    <div class="page" id="page2">
+        <h1 style="font-size:1.5rem; margin-bottom: 5px; text-shadow: none; color:#ff007f;" id="stageTitle">The Message Bottle</h1>
+        <p class="instruction-text" id="taskHelper">STAGE 1: Strike the match stick against the Matchbox strip to light it up!</p>
+        
+        <div class="puzzle-viewport" id="viewportArea">
+            <div class="matchbox-element" id="targetBox">
+                <div class="matchbox-label">MATCHES</div>
+            </div>
+
+            <div class="bottle-frame" id="physicalBottle">
+                <div class="wax-seal" id="waxLock">🔒 WAX</div>
+                <div class="cork-element" id="bottleCork"></div>
+                <div class="mini-scroll-inside" id="miniScroll"></div>
+                
+                <div class="melt-progress-container" id="progressBarWrapper">
+                    <div class="melt-progress-bar" id="progressBarFill"></div>
+                </div>
+            </div>
+
+            <div class="magic-match" id="draggableMatch">
+                <div class="match-fire" id="matchFlame"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FINAL PARCHMENT CARD -->
+    <div class="unrolled-parchment" id="prizeLetter">
+        <div id="suprise-msg">
+            <p style="font-size: 1.15rem; color: #4a0026; font-weight: 500; line-height:1.75; text-shadow: none;">
+                "You’re going to be an amazing doctor one day. Keep working hard and believing in yourself — your dedication and kindness will change many lives. Wishing you all the success for your bright future, future doctor!"
+            </p>
+            <hr style="border: none; border-top: 1px dashed #dfcbb5; margin: 20px 0;">
+            <p style="font-size: 1.4rem; color: #bc0044; font-family: 'Georgia', serif; font-style: italic; letter-spacing: 0.5px;">
+                Happy birthday bharti
+            </p>
+        </div>
+    </div>
+
+    <!-- CLEAN INTERNET ARCHIVE AUDIO BACKEND -->
+    <audio id="pianoAudio" loop preload="auto">
+        <source src="HAPPY BIRTHDAY TO YOU _ PIANO INSTRUMENTAL _ BEST HAPPY BITHDAY MUSIC 2021.mp3">
+    </audio>
+
+    <script>
+        const music = document.getElementById('pianoAudio');
+        const wordSequence = ['B', 'E', 'S', 'T', 'F', 'R', 'I', 'E', 'N', 'D'];
+        let currentSeqIdx = 0;
+
+        let nodeObjects = [
+            { id: 'node-B', letter: 'B', angle: 0, radius: 145, speed: 0.013 },
+            { id: 'node-E1', letter: 'E', angle: 0.6, radius: 110, speed: -0.015 },
+            { id: 'node-S', letter: 'S', angle: 1.2, radius: 150, speed: 0.011 },
+            { id: 'node-T', letter: 'T', angle: 1.8, radius: 125, speed: -0.014 },
+            { id: 'node-F', letter: 'F', angle: 2.4, radius: 135, speed: 0.016 },
+            { id: 'node-R', letter: 'R', angle: 3.0, radius: 115, speed: -0.013 },
+            { id: 'node-I', letter: 'I', angle: 3.6, radius: 140, speed: 0.012 },
+            { id: 'node-E2', letter: 'E', angle: 4.2, radius: 120, speed: -0.017 },
+            { id: 'node-N', letter: 'N', angle: 4.8, radius: 155, speed: 0.010 },
+            { id: 'node-D', letter: 'D', angle: 5.4, radius: 130, speed: -0.014 }
+        ];
+
+        function frameTickOrbitEngine() {
+            if (currentSeqIdx < wordSequence.length) {
+                nodeObjects.forEach(node => {
+                    const el = document.getElementById(node.id);
+                    if (el && !el.classList.contains('locked-in')) {
+                        node.angle += node.speed;
+                        const x = Math.cos(node.angle) * node.radius + 180 - 21;
+                        const y = Math.sin(node.angle) * node.radius + 180 - 21;
+                        el.style.left = `${x}px`;
+                        el.style.top = `${y}px`;
+                    }
+                });
+            }
+            requestAnimationFrame(frameTickOrbitEngine);
+        }
+        requestAnimationFrame(frameTickOrbitEngine);
+
+        function verifyQuantumLink(clickedLetter, nodeId) {
+            const targetLetter = wordSequence[currentSeqIdx];
+
+            if (clickedLetter === targetLetter) {
+                document.getElementById(nodeId).classList.add('locked-in');
+                currentSeqIdx++;
+
+                if (currentSeqIdx >= wordSequence.length) {
+                    document.getElementById('skyHelp').innerText = "LINK COMPLETE: ALIGNMENT STABILIZED! 🌌";
+                    
+                    // Music officially fires up here upon completing the constellation!
+                    music.volume = 0.5;
+                    music.play().catch(e => console.log("Audio play blocked by ecosystem rules:", e));
+
+                    setTimeout(() => {
+                        document.getElementById('skyOverlay').style.opacity = '0';
+                        setTimeout(() => {
+                            document.getElementById('skyOverlay').style.display = 'none';
+                            document.getElementById('page1').classList.add('active');
+                        }, 1200);
+                    }, 600);
+                }
+            } else {
+                document.getElementById('skyHelp').innerText = "❌ MATRIX BREAKDOWN: RESETTING ENGINE!";
+                document.getElementById('skyOverlay').style.backgroundColor = '#2c010d';
+                
+                setTimeout(() => {
+                    document.getElementById('skyOverlay').style.backgroundColor = '#010103';
+                    document.getElementById('skyHelp').innerText = "Trace the keyword in order: B → E → S → T → F → R → I → E → N → D";
+                    
+                    document.querySelectorAll('.quantum-node').forEach(node => {
+                        node.classList.remove('locked-in');
+                    });
+                    
+                    nodeObjects.forEach(node => {
+                        node.angle = Math.random() * Math.PI * 2;
+                        node.speed = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 0.012 + 0.008);
+                    });
+                    
+                    currentSeqIdx = 0;
+                }, 800);
+            }
+        }
+
+        function loadBottlePuzzleRoom() {
+            document.getElementById('page1').classList.remove('active');
+            document.getElementById('page2').classList.add('active');
+            initBottlePuzzleTask();
+        }
+
+        function initBottlePuzzleTask() {
+            const match = document.getElementById('draggableMatch');
+            const flame = document.getElementById('matchFlame');
+            const matchbox = document.getElementById('targetBox');
+            const wax = document.getElementById('waxLock');
+            const cork = document.getElementById('bottleCork');
+            const progressWrap = document.getElementById('progressBarWrapper');
+            const progressFill = document.getElementById('progressBarFill');
+            const helperText = document.getElementById('taskHelper');
+            const viewport = document.getElementById('viewportArea');
+            const bottle = document.getElementById('physicalBottle');
+
+            let subStage = "igniting"; 
+            let isDraggingMatch = false;
+            let isMatchLit = false;
+            let meltTimer = null;
+            let meltPct = 0;
+
+            match.addEventListener('mousedown', () => { isDraggingMatch = true; });
+            match.addEventListener('touchstart', () => { isDraggingMatch = true; }, { passive: true });
+
+            window.addEventListener('mousemove', movingMatch);
+            window.addEventListener('touchmove', movingMatch, { passive: false });
+            window.addEventListener('mouseup', stopMatchDrag);
+            window.addEventListener('touchend', stopMatchDrag);
+
+            function movingMatch(e) {
+                if (!isDraggingMatch || (subStage !== "igniting" && subStage !== "melting")) return;
+                const cx = e.touches ? e.touches[0].clientX : e.clientX;
+                const cy = e.touches ? e.touches[0].clientY : e.clientY;
+                const bounds = viewport.getBoundingClientRect();
+
+                match.style.left = `${cx - bounds.left - 10}px`;
+                match.style.top = `${cy - bounds.top - 4}px`;
+
+                if (!isMatchLit) {
+                    const boxBounds = matchbox.getBoundingClientRect();
+                    if (cx > boxBounds.left && cx < boxBounds.right && cy > boxBounds.top && cy < boxBounds.bottom) {
+                        isMatchLit = true;
+                        subStage = "melting";
+                        flame.style.display = 'block';
+                        matchbox.style.opacity = '0.4';
+                        helperText.innerText = "STAGE 2: Match Lit! Hold it directly over the Red Wax Seal to melt it.";
+                        progressWrap.style.display = 'block';
+                    }
+                } else {
+                    const waxBounds = wax.getBoundingClientRect();
+                    if (cx > waxBounds.left && cx < waxBounds.right && cy > waxBounds.top && cy < waxBounds.bottom) {
+                        if (!meltTimer) {
+                            meltTimer = setInterval(() => {
+                                meltPct += 3;
+                                progressFill.style.width = `${meltPct}%`;
+                                if (meltPct >= 100) { clearInterval(meltTimer); meltWaxSuccess(); }
+                            }, 60);
+                        }
+                    } else {
+                        resetMeltTracker();
+                    }
+                }
+            }
+
+            function stopMatchDrag() {
+                isDraggingMatch = false;
+                if (!isMatchLit) {
+                    match.style.left = ''; match.style.top = '';
+                } else if (subStage === "melting") {
+                    resetMeltTracker();
+                }
+            }
+
+            function resetMeltTracker() {
+                if (meltTimer) { clearInterval(meltTimer); meltTimer = null; }
+                meltPct = 0; progressFill.style.width = '0%';
+            }
+
+            function meltWaxSuccess() {
+                subStage = "uncorking";
+                match.style.display = 'none';
+                wax.style.opacity = '0';
+                progressWrap.style.display = 'none';
+                matchbox.style.display = 'none';
+                
+                document.getElementById('stageTitle').innerText = "High-Friction Cork Grip";
+                helperText.innerText = "STAGE 3: The cork is wedged tight. Pull it continuously UPWARDS past the limit!";
+                setupRealisticTensionUncork();
+            }
+
+            function setupRealisticTensionUncork() {
+                let isDraggingCork = false;
+                let startY = 0;
+                let pullDistance = 0;
+                const toughThreshold = 120; 
+
+                cork.addEventListener('mousedown', startCorkPull);
+                cork.addEventListener('touchstart', startCorkPull, { passive: false });
+
+                function startCorkPull(e) {
+                    if (subStage !== "uncorking") return;
+                    isDraggingCork = true;
+                    startY = e.touches ? e.touches[0].clientY : e.clientY;
+                    cork.style.transition = 'none';
+                    if(e.cancelable) e.preventDefault();
+                }
+
+                window.addEventListener('mousemove', movingCorkPull);
+                window.addEventListener('touchmove', movingCorkPull, { passive: false });
+
+                function movingCorkPull(e) {
+                    if (!isDraggingCork || subStage !== "uncorking") return;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    
+                    pullDistance = startY - clientY;
+                    if (pullDistance < 0) pullDistance = 0;
+
+                    if (pullDistance <= toughThreshold) {
+                        let structuralVibration = Math.sin(pullDistance * 0.7) * 3;
+                        cork.style.transform = `translateX(-50%) translateY(-${pullDistance}px) rotate(${structuralVibration}deg)`;
+                    } else {
+                        subStage = "cleared";
+                        isDraggingCork = false;
+                        executeCorkPopBlast();
+                    }
+                }
+
+                window.addEventListener('mouseup', releaseCorkTension);
+                window.addEventListener('touchend', releaseCorkTension);
+
+                function releaseCorkTension() {
+                    if (!isDraggingCork || subStage !== "uncorking") return;
+                    isDraggingCork = false;
+                    pullDistance = 0;
+                    cork.style.transition = 'transform 0.3s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
+                    cork.style.transform = 'translateX(-50%) translateY(0px) rotate(0deg)';
+                }
+            }
+
+            function executeCorkPopBlast() {
+                document.getElementById('stageTitle').innerText = "✨ Success! ✨";
+                helperText.innerText = "The bottle is opening... 🌊";
+                helperText.style.background = "rgba(0, 255, 127, 0.2)";
+                helperText.style.color = "#a3ffcc";
+
+                cork.style.transition = 'transform 0.4s cubic-bezier(0.1, 0.8, 0.2, 1.3), opacity 0.2s';
+                cork.style.transform = 'translateX(-50%) translateY(-200px) scale(0.5)';
+                cork.style.opacity = '0';
+                
+                document.getElementById('miniScroll').style.transition = 'transform 0.6s ease-in, opacity 0.3s';
+                document.getElementById('miniScroll').style.transform = 'translate(-50%, -140px) scale(0.1)';
+                document.getElementById('miniScroll').style.opacity = '0';
+                bottle.style.opacity = '0';
+
+                setTimeout(() => {
+                    document.getElementById('page2').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('page2').style.display = 'none';
+                        triggerParchmentRevealTransition();
+                    }, 500);
+                }, 900);
+            }
+        }
+
+        function triggerParchmentRevealTransition() {
+            document.body.classList.add('light-theme');
+            document.getElementById('prizeLetter').classList.add('reveal-active');
+            sunriseEngineActive = true;
+        }
+
+        // CANVAS PARTICLES ENGINE
+        const canvas = document.getElementById('fluidOceanCanvas');
+        const ctx = canvas.getContext('2d');
+        let visualElements = [];
+        let sunriseEngineActive = false;
+
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+
+        class SkyStar {
+            constructor() { this.reset(); }
+            reset() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height * 0.6; this.size = Math.random() * 1.6 + 0.4; this.alpha = Math.random(); this.speed = Math.random() * 0.012 + 0.004; }
+            update() { this.alpha += this.speed; if (this.alpha > 1 || this.alpha < 0) this.speed = -this.speed; }
+            draw() { ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(this.alpha)})`; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
+        }
+
+        class DriftHeart {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + Math.random() * 50;
+                this.size = Math.random() * 8 + 4;
+                this.speedY = Math.random() * 1.5 + 0.5;
+                this.speedX = Math.sin(Math.random() * Math.PI) * 0.5;
+                this.alpha = Math.random() * 0.5 + 0.5;
+                this.color = Math.random() > 0.5 ? '#ff4d94' : '#ff0066';
+            }
+            update() {
+                this.y -= this.speedY;
+                this.x += this.speedX;
+                if (this.y < -20) {
+                    this.y = canvas.height + 20;
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.bezierCurveTo(this.x - this.size / 2, this.y - this.size / 2, this.x - this.size, this.y + this.size / 3, this.x, this.y + this.size);
+                ctx.bezierCurveTo(this.x + this.size, this.y + this.size / 3, this.x + this.size / 2, this.y - this.size / 2, this.x, this.y);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        for(let i=0; i<60; i++) visualElements.push(new SkyStar());
+
+        function loop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (sunriseEngineActive && visualElements.length < 120) {
+                visualElements.push(new DriftHeart());
+            }
+
+            visualElements.forEach(item => {
+                item.update();
+                item.draw();
+            });
+            requestAnimationFrame(loop);
+        }
+        loop();
+    </script>
+</body>
+</html>
